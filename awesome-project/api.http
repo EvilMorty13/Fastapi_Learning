@@ -1,0 +1,10 @@
+POST http://localhost:8000/bands/
+Content-Type: application/json
+
+{
+    "name" : "Metallica",
+    "genre" : "ROCK"
+}
+###
+
+GET http://localhost:8000/bands
