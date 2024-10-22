@@ -6,12 +6,8 @@ app = FastAPI()
 from contextlib import asynccontextmanager
 from db import init_db,get_session
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    init_db()
-    yield
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 # BANDS = [
 #     {"id":1,'name':'The Beatles','genre':'Rock'},
@@ -48,10 +44,14 @@ async def band(band_id:Annotated[int,Path(title="The band ID")],session: Session
     return band
 
 @app.get('/bands/genre/{genre}')
-async def bands_for_genre(genre:GenreURLChoices) -> list[dict] :
-    return[
-        b for b in BANDS if b['genre'].lower() == genre.value
-    ]
+async def bands_for_genre(genre: GenreURLChoices, session: Session = Depends(get_session)) -> list[Band]:
+    band_list = session.exec(select(Band).where(Band.genre == genre)).all()
+
+    if not band_list:
+        raise HTTPException(status_code=404, detail="No bands found for the specified genre")
+    
+    return band_list
+
 
 
 
